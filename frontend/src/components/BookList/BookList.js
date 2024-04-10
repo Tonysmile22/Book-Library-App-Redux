@@ -9,7 +9,7 @@ const BookList = () => {
 
     const books = useSelector((state) => state.books)
     const titleFilter = useSelector(selectTitleFilter)
-    const autoFilter = useSelector(selectAuthorFilter)
+    const authorFilter = useSelector(selectAuthorFilter)
     const onlyFavoriteFilter = useSelector(selectOnlyFavoriteFilter)
     const dispatch = useDispatch()
 
@@ -23,10 +23,24 @@ const BookList = () => {
 
     const fileredBook = books.filter((book) => {
         const matchesTitle = book.title.toLowerCase().includes(titleFilter.toLowerCase())
-        const mathesAuthor = book.author.toLowerCase().includes(autoFilter.toLowerCase())
+        const mathesAuthor = book.author.toLowerCase().includes(authorFilter.toLowerCase())
         const matchesFavorite = onlyFavoriteFilter ? book.isFavorite : true
         return matchesTitle && mathesAuthor && matchesFavorite;
     })
+
+    const highlightMatch = (text, filter) => {
+        if (!filter) return text
+        const regex = new RegExp(`(${filter})`, 'gi')
+
+        return text.split(regex).map((substring, i) => {
+            if (substring.toLowerCase() === filter.toLowerCase()) {
+                return (<span key={i} className='highlight'>
+                    {substring}
+                </span>)
+            }
+            return substring
+        })
+    }
 
     return (
         <div className='app-block book-list'>
@@ -34,7 +48,7 @@ const BookList = () => {
             {books.length === 0 ? (<p>No books available</p>) : (<ul>
                 {fileredBook.map((book, i) => (
                     <li key={book.id}>
-                        <div className='book-info'>{++i}. {book.title} by <strong>{book.author}</strong></div>
+                        <div className='book-info'>{++i}. {highlightMatch(book.title, titleFilter)} by{' '}<strong>{highlightMatch(book.author, authorFilter)}</strong></div>
                         <div className='book-actions'>
                             <span onClick={() => handleToggleFavorite(book.id)}>
                                 {book.isFavorite ? (
